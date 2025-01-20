@@ -12,7 +12,7 @@ typedef struct {
 bool validate_ean8(const char *identifier);
 
 // Converte o identificador EAN-8 em uma sequência de barras (0 = branco, 1 = preto)
-void ean8_to_bars(const char *identifier, int *bars);
+void ean8_to_bars(const char *identifier, char *bars);
 
 // Calcula o dígito verificador para um identificador EAN-8
 char calculate_check_digit(const char *identifier);

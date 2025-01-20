@@ -32,36 +32,36 @@ char calculate_check_digit(const char *identifier) {
     return (remainder == 0) ? '0' : '0' + (10 - remainder);
 }
 
-void ean8_to_bars(const char *identifier, int *bars) {
+void ean8_to_bars(const char *identifier, char *bars) {
     // Definição simplificada do padrão EAN-8
-    int l_patterns[10][7] = {
-        {0, 0, 0, 1, 1, 0, 1}, // L-code para '0'
-        {0, 0, 1, 1, 0, 0, 1}, // L-code para '1'
-        {0, 0, 1, 0, 0, 1, 1}, // L-code para '2'
-        {0, 1, 1, 1, 1, 0, 1}, // L-code para '3'
-        {0, 1, 0, 0, 0, 1, 1}, // L-code para '4'
-        {0, 1, 1, 0, 0, 0, 1}, // L-code para '5'
-        {0, 1, 0, 1, 1, 1, 1}, // L-code para '6'
-        {0, 1, 1, 1, 0, 1, 1}, // L-code para '7'
-        {0, 1, 1, 0, 1, 1, 1}, // L-code para '8'
-        {0, 0, 0, 1, 0, 1, 1}  // L-code para '9'
+    char l_patterns[10][7] = {
+        {'0', '0', '0', '1', '1', '0', '1'}, // L-code para '0'
+        {'0', '0', '1', '1', '0', '0', '1'}, // L-code para '1'
+        {'0', '0', '1', '0', '0', '1', '1'}, // L-code para '2'
+        {'0', '1', '1', '1', '1', '0', '1'}, // L-code para '3'
+        {'0', '1', '0', '0', '0', '1', '1'}, // L-code para '4'
+        {'0', '1', '1', '0', '0', '0', '1'}, // L-code para '5'
+        {'0', '1', '0', '1', '1', '1', '1'}, // L-code para '6'
+        {'0', '1', '1', '1', '0', '1', '1'}, // L-code para '7'
+        {'0', '1', '1', '0', '1', '1', '1'}, // L-code para '8'
+        {'0', '0', '0', '1', '0', '1', '1'}  // L-code para '9'
     };
 
-    int r_patterns[10][7] = {
-        {1, 1, 1, 0, 0, 1, 0}, // R-code para '0'
-        {1, 1, 0, 0, 1, 1, 0}, // R-code para '1'
-        {1, 1, 0, 1, 1, 0, 0}, // R-code para '2'
-        {1, 0, 0, 0, 0, 1, 0}, // R-code para '3'
-        {1, 0, 1, 1, 1, 0, 0}, // R-code para '4'
-        {1, 0, 0, 1, 1, 1, 0}, // R-code para '5'
-        {1, 0, 1, 0, 0, 0, 1}, // R-code para '6'
-        {1, 0, 0, 0, 1, 0, 0}, // R-code para '7'
-        {1, 0, 0, 1, 0, 0, 0}, // R-code para '8'
-        {1, 1, 1, 0, 1, 0, 0}  // R-code para '9'
+    char r_patterns[10][7] = {
+        {'1', '1', '1', '0', '0', '1', '0'}, // R-code para '0'
+        {'1', '1', '0', '0', '1', '1', '0'}, // R-code para '1'
+        {'1', '1', '0', '1', '1', '0', '0'}, // R-code para '2'
+        {'1', '0', '0', '0', '0', '1', '0'}, // R-code para '3'
+        {'1', '0', '1', '1', '1', '0', '0'}, // R-code para '4'
+        {'1', '0', '0', '1', '1', '1', '0'}, // R-code para '5'
+        {'1', '0', '1', '0', '0', '0', '1'}, // R-code para '6'
+        {'1', '0', '0', '0', '1', '0', '0'}, // R-code para '7'
+        {'1', '0', '0', '1', '0', '0', '0'}, // R-code para '8'
+        {'1', '1', '1', '0', '1', '0', '0'}  // R-code para '9'
     };
 
     // Barra inicial
-    bars[0] = 1; bars[1] = 0; bars[2] = 1;
+    bars[0] = '1'; bars[1] = '0'; bars[2] = '1';
 
     int pos = 3; // Posição atual no array de barras
 
@@ -75,7 +75,7 @@ void ean8_to_bars(const char *identifier, int *bars) {
     }
 
     // Barra de separação (meio do código de barras)
-    bars[pos++] = 0; bars[pos++] = 1; bars[pos++] = 0; bars[pos++] = 1; bars[pos++] = 0;
+    bars[pos++] = '0'; bars[pos++] = '1'; bars[pos++] = '0'; bars[pos++] = '1'; bars[pos++] = '0';
 
     // Gerar barras para os últimos 4 dígitos (R-codes)
     for (int i = 4; i < 8; i++) {
@@ -86,7 +86,7 @@ void ean8_to_bars(const char *identifier, int *bars) {
     }
 
     // Barra final
-    bars[pos++] = 1; bars[pos++] = 0; bars[pos++] = 1;
+    bars[pos++] = '1'; bars[pos++] = '0'; bars[pos++] = '1';
 }
 
 // Função para decodificar as barras em um identificador EAN-8

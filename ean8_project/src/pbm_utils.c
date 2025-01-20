@@ -62,8 +62,8 @@ bool save_pbm(const char *filename, const PBMImage *image) {
         return false;
     }
 
-    fprintf(file, "P4\n%d %d\n", image->width, image->height);
-    size_t data_size = image->width * image->height / 8;
+    fprintf(file, "P1\n%d %d\n", image->width, image->height);
+    size_t data_size = image->width * image->height * sizeof(char);
     fwrite(image->data, 1, data_size, file);
     fclose(file);
     return true;

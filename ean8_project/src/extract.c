@@ -89,7 +89,10 @@ int main(int argc, char *argv[]) {
     }
 
     char bars[67];
-    printf("bars %s", bars);
+    for (int i = 0; i<67;i++) {
+        printf("bars %c", bars[i]);
+    }
+    
     extract_bars(image, bars, 67, bar_width, spacing);
     printf("bars %s", bars);
     // Reconstrói o identificador a partir das barras

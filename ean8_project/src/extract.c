@@ -4,18 +4,17 @@
 #include <stdlib.h>
 
 int extract_bars(const PBMImage *image, char *bars, int num_bars, int pixel_width, int spacing) {
-   // int x_offset = spacing + pixel_width / 2; // Centraliza o cálculo nas barras
     char _bars[num_bars];
 
     int offset = spacing + spacing*image->width;
-    for (int i = 0; i < num_bars; i+=pixel_width) {
-        _bars[i] = image->data[i + offset];
+    for (int i = 0; i < num_bars; i++) {
+        _bars[i] = image->data[i * pixel_width + offset];
     }
-
+   
     for (int j = spacing; j < image->height - spacing; j++) {
 
         for (int i = 0; i < spacing; i++) {
-            if (image->data[i] != '0') {
+            if (image->data[i + j * image->width] != '0') {
                 return -1;
             }
         }
@@ -23,7 +22,7 @@ int extract_bars(const PBMImage *image, char *bars, int num_bars, int pixel_widt
         int pos = spacing;
 
         for (int i = 0; i < num_bars; i++) {
-            bars[i] = image->data[pos];
+            bars[i] = image->data[j * image->width + pos];
             
             if(bars[i] != _bars[i]) {
                 return -1;
@@ -33,7 +32,7 @@ int extract_bars(const PBMImage *image, char *bars, int num_bars, int pixel_widt
         }
 
         for (int i = pos; i < image->width; i++) {
-            if (image->data[i] != '0') {
+            if (image->data[j * image->width + i] != '0') {
                 return -1;
             }
         }
@@ -89,15 +88,12 @@ int main(int argc, char *argv[]) {
     }
 
     char bars[67];
-    for (int i = 0; i<67;i++) {
-        printf("bars %c", bars[i]);
-    }
-    
+   
     extract_bars(image, bars, 67, bar_width, spacing);
-    printf("bars %s", bars);
-    // Reconstrói o identificador a partir das barras
-    char identifier[8] = {0}; // 8 dígitos + terminador
     
+    // Reconstrói o identificador a partir das barras
+    char identifier[9] = {'0'}; // 8 dígitos + terminador
+
     if (!decode_bars_to_ean8(bars, identifier)) {
         fprintf(stderr, "Erro: Não foi possível decodificar o identificador do código de barras.\n");
         free_pbm(image);

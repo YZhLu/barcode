@@ -92,9 +92,6 @@ void ean8_to_bars(const char *identifier, char *bars) {
 
 
 int verificar_bordas(const char *seguiment) {
-    // Verifica se os três primeiros caracteres são "101"
-    printf("seguiment %s\n", seguiment);
-
     return strncmp(seguiment, "101", 3) == 0;
 }
 
@@ -127,17 +124,20 @@ int verificar_padroes(const char *segmento, const char padrao[7]) {
     return 1; // Iguais
 }
 
-int decodificar_bar(const char *digitos, char side) {
+char decodificar_bar(const char *digitos, char side) {
+    
     if (side == 'l') {
         for (int i = 0; i < 10; i++) {
             if (verificar_padroes(digitos, l_patterns[i])) {
-                return i; // Número encontrado nos padrões L
+                //printf("chaoum - %d - llll 135", i);
+                //printf("---- %c, ",i);
+                return '0' + i; // Número encontrado nos padrões L
             }
         }
     } else if (side == 'r') {
         for (int i = 0; i < 10; i++) {
             if (verificar_padroes(digitos, r_patterns[i])) {
-                return i; // Número encontrado nos padrões L
+                return '0' + i; // Número encontrado nos padrões R
             }
         }
     }
@@ -149,36 +149,28 @@ bool decode_bars_to_ean8(const char *bars, char *identifier) {
     if (!bars || !identifier) {
         return false;
     }
-    // Verificar se o padrão de barras contém pelo menos o comprimento mínimo esperado
-    //const int min_bar_length = 67; // Barras iniciais, L-codes, separador, R-codes, barras finais
     
-    // printf("%s",(bars));
-
-    // if (strlen(bars) < min_bar_length) {
-    //     fprintf(stderr, "Comprimento das barras é insuficiente.\n");
-    //     return false;
-    // }
-
     const char *borda_inicial = bars;
     const char *digitos_l = bars + 3;
     const char *mid = bars + 3 + 28;
     const char *digitos_r = bars + 3 + 28 + 5;
     const char *borda_final = bars + 3 + 28 + 5 + 28;
 
+
     if (!verificar_bordas(borda_inicial)) {
         return false;
     }
-printf("chegou 169");
+
     if (!verificar_meio(mid)) {
         return false;
     }
-    
+   
     if (!verificar_bordas(borda_final)) {
         return false;
     }
-    
+
     for (int i = 0; i < 4; i++) {
-        int digito = decodificar_bar(digitos_l, 'l');
+        char digito = decodificar_bar(digitos_l +  i*7, 'l');
         if (digito == -1) {
             return false;
         } else {
@@ -186,14 +178,16 @@ printf("chegou 169");
         }
     }
 
-    for (int i = 4; i < 8; i++) {
-        int digito = decodificar_bar(digitos_r, 'r');
+    for (int i = 0; i < 4; i++) {
+        char digito = decodificar_bar(digitos_r + i*7, 'r');
         if (digito == -1) {
             return false;
         } else {
-            identifier[i] = digito;
+            identifier[i+4] = digito;
         }
     }
+
+    identifier[8] = '\0';
 
     return true;
 }

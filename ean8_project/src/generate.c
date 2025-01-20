@@ -5,8 +5,11 @@
 #include <string.h>
 
 #define DEFAULT_WIDTH 209
-#define DEFAULT_HEIGHT 100
+
 #define DEFAULT_SPACING 4
+#define DEFAULT_BAR_WIDTH 3
+#define DEFAULT_BAR_HEIGHT 100
+#define DEFAULT_NAME "barcode"
 
 int main(int argc, char *argv[]) {
     if (argc < 2) {
@@ -20,10 +23,17 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    int width = (argc > 2) ? atoi(argv[2]) : DEFAULT_WIDTH;
-    int height = (argc > 3) ? atoi(argv[3]) : DEFAULT_HEIGHT;
+    //int width = (argc > 2) ? atoi(argv[2]) : DEFAULT_WIDTH;
+    int spacing = (argc > 2) ? atoi(argv[2]) : DEFAULT_SPACING;
+    int bar_width = (argc > 3) ? atoi(argv[3]) : DEFAULT_BAR_WIDTH;
+    int bar_height = (argc > 4) ? atoi(argv[4]) : DEFAULT_BAR_HEIGHT;
+    char *name = (argc > 5) ? argv[5] : DEFAULT_NAME;
 
-    PBMImage image = {width, height, calloc(width * height * sizeof(char), 1)};
+    int width = ((bar_width*67) + (spacing * 2));
+    int height = (bar_height + (spacing * 2));
+    char *format = "P1";
+
+    PBMImage image = {format, width, height, calloc(width * height * sizeof(char), 1)};
     memset(image.data, '0', (width * height * sizeof(char)));
 
     if (!image.data) {
@@ -34,24 +44,15 @@ int main(int argc, char *argv[]) {
     char bars[67]; // Número total de barras no EAN-8
     ean8_to_bars(identifier, bars);
 
-    // Lógica para desenhar barras na imagem
-    int bar_width = (width - (DEFAULT_SPACING * 2)) / 67; // Ajuste da largura da barra
-    int bar_height = height - DEFAULT_SPACING; // A altura das barras será igual à altura da imagem
-
     // Adiciona espaçamento à esquerda
-    int x_offset = DEFAULT_SPACING;
+    int x_offset = spacing; //DEFAULT_SPACING;
 
     for (int i = 0; i < 67; i++) {
         if (bars[i] == '1') { // Se a barra estiver ativa (1)
             // Desenha a barra no formato PBM
             for (int j = 0; j < bar_width; j++) {
                 // Para cada posição horizontal da barra
-                for (int k = DEFAULT_SPACING; k < bar_height; k++) {
-                    // Calcula o índice do byte e a posição do bit para cada pixel
-                    //int pixel_index = (k * width + (x_offset + j)) / 8;
-                    //int bit_position = 7 - ((x_offset + j) % 8); // Posição do bit dentro do byte
-                    // Ativa o bit (definindo como 1)
-                    //image.data[pixel_index] |= (1 << bit_position);
+                for (int k = spacing; k < bar_height + spacing; k++) {
                     int pixel_index = (k * width + (x_offset + j));
                     image.data[pixel_index] = '1';
                 }
@@ -61,7 +62,7 @@ int main(int argc, char *argv[]) {
         x_offset += bar_width;
     }
 
-    if (!save_pbm("output.pbm", &image)) {
+    if (!save_pbm(name, &image)) {
         fprintf(stderr, "Erro ao salvar a imagem.\n");
         free_pbm(&image);
         return 1;

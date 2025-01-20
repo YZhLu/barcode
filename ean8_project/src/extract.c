@@ -3,26 +3,60 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define DEFAULT_PIXEL_WIDTH 2
-#define DEFAULT_SPACING 10
+int extract_bars(const PBMImage *image, char *bars, int num_bars, int pixel_width, int spacing) {
+   // int x_offset = spacing + pixel_width / 2; // Centraliza o cálculo nas barras
+    char _bars[num_bars];
 
-void extract_bars(const PBMImage *image, int *bars, int num_bars, int pixel_width, int spacing) {
-    int x_offset = spacing + pixel_width / 2; // Centraliza o cálculo nas barras
-    for (int i = 0; i < num_bars; i++) {
-        int black_pixel_count = 0;
-        for (int x = 0; x < pixel_width; x++) {
-            for (int y = 0; y < image->height; y++) {
-                int pixel_x = x_offset + i * pixel_width + x;
-                int byte_index = (pixel_x + y * image->width) / 8;
-                int bit_index = 7 - (pixel_x % 8);
-                if (image->data[byte_index] & (1 << bit_index)) {
-                    black_pixel_count++;
-                }
+    int offset = spacing + spacing*image->width;
+    for (int i = 0; i < num_bars; i+=pixel_width) {
+        _bars[i] = image->data[i + offset];
+    }
+
+    for (int j = spacing; j < image->height - spacing; j++) {
+
+        for (int i = 0; i < spacing; i++) {
+            if (image->data[i] != '0') {
+                return -1;
             }
         }
-        // Define se a barra é preta ou branca
-        bars[i] = (black_pixel_count >= (pixel_width * image->height / 2)) ? 1 : 0;
+
+        int pos = spacing;
+
+        for (int i = 0; i < num_bars; i++) {
+            bars[i] = image->data[pos];
+            
+            if(bars[i] != _bars[i]) {
+                return -1;
+            }
+
+            pos = pos + pixel_width;
+        }
+
+        for (int i = pos; i < image->width; i++) {
+            if (image->data[i] != '0') {
+                return -1;
+            }
+        }
     }
+
+    return 0;
+}
+
+int get_spacing(PBMImage *image) {
+    int spacing = 0;
+    for (int j = 0; j < image->height; j++){
+        for (int i = 0; i < image->width; i++){
+            if(image->data[j*image->width + i] != '0') {
+                return spacing;
+            }
+        }
+        spacing++;
+    }
+    return -1;
+}
+
+int get_bar_width(int w, int s) {
+    return (w - 2*s)/67;
 }
 
 int main(int argc, char *argv[]) {
@@ -38,17 +72,29 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    if (image->width < DEFAULT_PIXEL_WIDTH * 95 + 2 * DEFAULT_SPACING) {
+    int spacing = get_spacing(image);
+    
+    if (spacing == -1) {
         fprintf(stderr, "Erro: Imagem não parece conter um código de barras válido.\n");
         free_pbm(image);
         return 1;
     }
 
-    int bars[95];
-    extract_bars(image, bars, 95, DEFAULT_PIXEL_WIDTH, DEFAULT_SPACING);
+    int bar_width = get_bar_width(image->width, spacing);
 
+    if (image->width < bar_width * 67 + 2 * spacing) {
+        fprintf(stderr, "Erro: Imagem não parece conter um código de barras válido.\n");
+        free_pbm(image);
+        return 1;
+    }
+
+    char bars[67];
+    printf("bars %s", bars);
+    extract_bars(image, bars, 67, bar_width, spacing);
+    printf("bars %s", bars);
     // Reconstrói o identificador a partir das barras
-    char identifier[9] = {0}; // 8 dígitos + terminador
+    char identifier[8] = {0}; // 8 dígitos + terminador
+    
     if (!decode_bars_to_ean8(bars, identifier)) {
         fprintf(stderr, "Erro: Não foi possível decodificar o identificador do código de barras.\n");
         free_pbm(image);

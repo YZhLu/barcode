@@ -5,6 +5,7 @@
 
 // Estrutura para armazenar imagens PBM
 typedef struct {
+    char *format;
     int width;
     int height;
     unsigned char *data;

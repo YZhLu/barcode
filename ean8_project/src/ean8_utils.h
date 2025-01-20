@@ -24,6 +24,6 @@ char calculate_check_digit(const char *identifier);
  * @param ean8 Array para armazenar o identificador EAN-8 extraído.
  * @return true se a decodificação foi bem-sucedida; false caso contrário.
  */
-bool decode_bars_to_ean8(const int *bars, char *identifier);
+bool decode_bars_to_ean8(const char *bars, char *identifier);
 
 #endif
